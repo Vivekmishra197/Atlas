@@ -17,11 +17,31 @@
         canvas {
             display: block;
         }
+        #brandList {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 28px;
+            text-align: right;
+            line-height: 1.5;
+        }
     </style>
     <title>Company Solar System (Top View with Rotating Orbits)</title>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+    <div id="brandList">
+        Brands with which we are working:
+        <ul>
+            <li>Atlas Copco</li>
+            <li>Leybold</li>
+            <li>Edwards</li>
+            <li>Chicago Pneumatic</li>
+            <li>Henrob</li>
+            <li>Airtech</li>
+            <li>Many more</li>
+        </ul>
+    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
@@ -33,16 +53,23 @@
 
         // Define companies in the solar system
         const companies = [
-            { name: 'Atlas Copco', size: 20, distance: 150, angle: 0, angularSpeed: 0.01, color: 'orange', specialization: 'Well-known brand' },
-            { name: 'Leybold', size: 15, distance: 250, angle: 0, angularSpeed: 0.02, color: 'blue', specialization: 'Vacuum solutions' },
-            { name: 'Edwards', size: 25, distance: 350, angle: 0, angularSpeed: 0.015, color: 'green', specialization: 'Vacuum and abatement solutions' },
-            { name: 'Chicago Pneumatic', size: 30, distance: 450, angle: 0, angularSpeed: 0.008, color: 'orange', specialization: 'Pneumatic tools and equipment' },
-            { name: 'Nash', size: 18, distance: 550, angle: 0, angularSpeed: 0.012, color: 'purple', specialization: 'Liquid ring vacuum pumps' },
-            { name: 'Becker', size: 35, distance: 650, angle: 0, angularSpeed: 0.009, color: 'yellow', specialization: 'Vacuum and compressed air technology' },
+            { name: 'Atlas Copco', size: 22, distance: 150, angle: 0, angularSpeed: 0.01, color: 'orange', specialization: 'Well-known brand' },
+            { name: 'Leybold', size: 17, distance: 250, angle: 0, angularSpeed: 0.02, color: '#8B0000', specialization: 'Vacuum solutions', textColor: 'linear-gradient(#8B0000 50%, white 50%)' }, // Half dark red, half white
+            { name: 'Edwards', size: 27.5, distance: 350, angle: 0, angularSpeed: 0.015, color: 'green', specialization: 'Vacuum and abatement solutions' },
+            { name: 'Chicago Pneumatic', size: 33, distance: 450, angle: 0, angularSpeed: 0.008, color: 'orange', specialization: 'Pneumatic tools and equipment' },
+            { name: 'Henrob', size: 19.8, distance: 550, angle: 0, angularSpeed: 0.012, color: 'purple', specialization: 'Liquid ring vacuum pumps' },
+            { name: 'Airtech', size: 38.5, distance: 650, angle: 0, angularSpeed: 0.009, color: 'yellow', specialization: 'Vacuum and compressed air technology' },
         ];
 
         // Initial zoom level
         let zoomLevel = 1;
+
+        // Initial position for the Happy New Year message
+        let messageX = 20; // Left side
+        let messageY = -50; // Above the canvas
+
+        // Initial position for GECIA
+        let geciaY = -50;
 
         function drawTopView() {
             // Clear canvas
@@ -51,7 +78,7 @@
 
             // Draw central text
             ctx.fillStyle = 'white';
-            ctx.font = '24px Arial';
+            ctx.font = '26.4px Arial'; // Increased font size by 10%
             const centerText = 'Atlas Copco Group';
             const centerTextWidth = ctx.measureText(centerText).width;
             ctx.fillText(centerText, canvas.width / 2 - centerTextWidth / 2, canvas.height / 2);
@@ -70,8 +97,10 @@
                 ctx.beginPath();
                 ctx.moveTo(canvas.width / 2, canvas.height / 2);
                 ctx.lineTo(x, y);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.strokeStyle = 'rgba(255, 165, 0, 0.8)'; // Bold orange color
+                ctx.lineWidth = 2;
                 ctx.stroke();
+                ctx.lineWidth = 1;
 
                 // Draw company as a circle (spherical shape)
                 ctx.fillStyle = company.color;
@@ -81,34 +110,65 @@
 
                 // Draw company name as a label
                 ctx.fillStyle = 'white';
-                ctx.font = '12px Arial';
+                ctx.font = '14.4px Arial'; // Increased font size by 10%
+                
+                // Use gradient for Leybold's text color
+                if (company.name === 'Leybold') {
+                    const gradient = ctx.createLinearGradient(x, y - company.size * zoomLevel - 5, x, y + company.size * zoomLevel + 15);
+                    gradient.addColorStop(0, '#8B0000'); // Dark red color
+                    gradient.addColorStop(0.5, 'white'); // Halfway point
+                    gradient.addColorStop(1, 'white'); // White color
+                    ctx.fillStyle = gradient;
+                }
+
                 ctx.fillText(company.name, x, y - company.size * zoomLevel - 5);
                 
                 // Draw company specialization as a label
+                ctx.fillStyle = company.textColor || 'white'; // Use specified text color or default to white
                 ctx.fillText(company.specialization, x, y + company.size * zoomLevel + 15);
             });
+
+            // Draw Happy New Year message
+            drawHappyNewYearMessage();
+
+            // Draw GECIA below Happy New Year message
+            ctx.fillStyle = 'white';
+            ctx.font = '20px Arial';
+            ctx.fillText('FROM GECIA PLC VTIT TEAM', messageX, messageY + 80);
+
+            // Update GECIA position
+            geciaY += 2; // Move down
+            if (geciaY > canvas.height + 50) {
+                // Reset GECIA position when it goes below the canvas
+                geciaY = -50;
+            }
 
             // Request the next frame for top view
             requestAnimationFrame(drawTopView);
         }
 
         function drawOrbitsAndLines() {
-            ctx.strokeStyle = 'rgba(255, 165, 0, 0.7)'; // Bold orange color
+            ctx.strokeStyle = 'rgba(255, 165, 0, 0.8)'; // Bold orange color
             companies.forEach(company => {
                 // Draw orbit
                 ctx.beginPath();
                 ctx.arc(canvas.width / 2, canvas.height / 2, company.distance * zoomLevel, 0, 2 * Math.PI);
                 ctx.stroke();
-
-                // Draw pointing line from center to the planet
-                ctx.beginPath();
-                ctx.moveTo(canvas.width / 2, canvas.height / 2);
-                const x = canvas.width / 2 + company.distance * Math.cos(company.angle) * zoomLevel;
-                const y = canvas.height / 2 + company.distance * Math.sin(company.angle) * zoomLevel;
-                ctx.lineTo(x, y);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-                ctx.stroke();
             });
+        }
+
+        function drawHappyNewYearMessage() {
+            // Draw Happy New Year message with matching size
+            ctx.fillStyle = 'orange';
+            ctx.font = `${companies[0].size * 1.1}px Arial`; // Match the size with Atlas Copco Group and increased by 10%
+            ctx.fillText('Happy New Year 2024! 🎉🥳', messageX, messageY);
+
+            // Update message position
+            messageY += 2; // Move down
+            if (messageY > canvas.height + 50) {
+                // Reset message position when it goes below the canvas
+                messageY = -50;
+            }
         }
 
         // Initial draw for top view
