@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #054e5a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+    <title>Company Solar System (Top View with Rotating Orbits)</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Define companies in the solar system
+        const companies = [
+            { name: 'Atlas Copco', size: 20, distance: 150, angle: 0, angularSpeed: 0.01, color: 'orange', specialization: 'Well-known brand' },
+            { name: 'Leybold', size: 15, distance: 250, angle: 0, angularSpeed: 0.02, color: 'blue', specialization: 'Vacuum solutions' },
+            { name: 'Edwards', size: 25, distance: 350, angle: 0, angularSpeed: 0.015, color: 'green', specialization: 'Vacuum and abatement solutions' },
+            { name: 'Chicago Pneumatic', size: 30, distance: 450, angle: 0, angularSpeed: 0.008, color: 'orange', specialization: 'Pneumatic tools and equipment' },
+            { name: 'Nash', size: 18, distance: 550, angle: 0, angularSpeed: 0.012, color: 'purple', specialization: 'Liquid ring vacuum pumps' },
+            { name: 'Becker', size: 35, distance: 650, angle: 0, angularSpeed: 0.009, color: 'yellow', specialization: 'Vacuum and compressed air technology' },
+        ];
+
+        // Initial zoom level
+        let zoomLevel = 1;
+
+        function drawTopView() {
+            // Clear canvas
+            ctx.fillStyle = '#054e5a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw central text
+            ctx.fillStyle = 'white';
+            ctx.font = '24px Arial';
+            const centerText = 'Atlas Copco Group';
+            const centerTextWidth = ctx.measureText(centerText).width;
+            ctx.fillText(centerText, canvas.width / 2 - centerTextWidth / 2, canvas.height / 2);
+
+            // Draw pointing lines and orbits
+            drawOrbitsAndLines();
+
+            // Draw companies in top view
+            companies.forEach(company => {
+                // Update company position based on angle
+                company.angle += company.angularSpeed;
+                const x = canvas.width / 2 + company.distance * Math.cos(company.angle) * zoomLevel;
+                const y = canvas.height / 2 + company.distance * Math.sin(company.angle) * zoomLevel;
+
+                // Draw pointing line from center to the planet
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.stroke();
+
+                // Draw company as a circle (spherical shape)
+                ctx.fillStyle = company.color;
+                ctx.beginPath();
+                ctx.arc(x, y, company.size * zoomLevel, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Draw company name as a label
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.fillText(company.name, x, y - company.size * zoomLevel - 5);
+                
+                // Draw company specialization as a label
+                ctx.fillText(company.specialization, x, y + company.size * zoomLevel + 15);
+            });
+
+            // Request the next frame for top view
+            requestAnimationFrame(drawTopView);
+        }
+
+        function drawOrbitsAndLines() {
+            ctx.strokeStyle = 'rgba(255, 165, 0, 0.7)'; // Bold orange color
+            companies.forEach(company => {
+                // Draw orbit
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, company.distance * zoomLevel, 0, 2 * Math.PI);
+                ctx.stroke();
+
+                // Draw pointing line from center to the planet
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, canvas.height / 2);
+                const x = canvas.width / 2 + company.distance * Math.cos(company.angle) * zoomLevel;
+                const y = canvas.height / 2 + company.distance * Math.sin(company.angle) * zoomLevel;
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.stroke();
+            });
+        }
+
+        // Initial draw for top view
+        drawTopView();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Handle zoom in and out using mouse wheel
+        canvas.addEventListener('wheel', (event) => {
+            if (event.deltaY < 0 && zoomLevel < 3) {
+                // Zoom in
+                zoomLevel *= 1.1;
+            } else if (event.deltaY > 0 && zoomLevel > 0.2) {
+                // Zoom out
+                zoomLevel /= 1.1;
+            }
+        });
+    </script>
+</body>
+</html>
